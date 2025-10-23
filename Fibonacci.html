@@ -1,0 +1,106 @@
+from PIL import Image, ImageDraw
+import math
+import colorsys
+import random
+
+# ------------------------------
+# Parameters
+# ------------------------------
+num_fib = 15          # Number of Fibonacci numbers (more = bigger image)
+scale = 20            # Pixel size scale for each Fibonacci number
+image_size = 3000     # Canvas size
+background_color = (10, 10, 10)  # Dark background
+text_overlay = True   # Draw Fibonacci numbers on squares
+
+# ------------------------------
+# Generate Fibonacci sequence
+# ------------------------------
+def fibonacci(n):
+    fib = [1, 1]
+    for i in range(2, n):
+        fib.append(fib[-1] + fib[-2])
+    return fib[:n]
+
+fib_numbers = fibonacci(num_fib)
+
+# ------------------------------
+# Generate unique colors
+# ------------------------------
+def generate_color_palette(n):
+    colors = []
+    for i in range(n):
+        hue = (i * 0.61803398875) % 1.0  # golden ratio fraction for even distribution
+        lightness = 0.5 + 0.3 * random.random()  # slight variation
+        saturation = 0.7 + 0.3 * random.random()
+        r, g, b = colorsys.hls_to_rgb(hue, lightness, saturation)
+        colors.append((int(r*255), int(g*255), int(b*255)))
+    return colors
+
+colors = generate_color_palette(100000)  # many colors
+
+# ------------------------------
+# Create canvas
+# ------------------------------
+img = Image.new("RGB", (image_size, image_size), background_color)
+draw = ImageDraw.Draw(img)
+
+# Center of the image
+cx, cy = image_size // 2, image_size // 2
+
+# ------------------------------
+# Draw Fibonacci spiral with squares
+# ------------------------------
+angle = 0
+x, y = cx, cy
+
+color_index = 0
+
+for idx, fib in enumerate(fib_numbers):
+    size = fib * scale
+
+    # Draw square for current Fibonacci number
+    for i in range(size):
+        for j in range(size):
+            draw_x = int(x + i * math.cos(angle) - j * math.sin(angle))
+            draw_y = int(y + i * math.sin(angle) + j * math.cos(angle))
+            if 0 <= draw_x < image_size and 0 <= draw_y < image_size:
+                draw.point((draw_x, draw_y), fill=colors[color_index % len(colors)])
+                color_index += 1
+
+    # Update position for next square (Fibonacci spiral logic)
+    if idx % 4 == 0:
+        x += size
+        y -= 0
+    elif idx % 4 == 1:
+        x -= 0
+        y += size
+    elif idx % 4 == 2:
+        x -= size
+        y += 0
+    elif idx % 4 == 3:
+        x += 0
+        y -= size
+
+    angle += math.pi / 2  # rotate for next square
+
+# ------------------------------
+# Optionally add Fibonacci numbers as text
+# ------------------------------
+if text_overlay:
+    from PIL import ImageFont
+    try:
+        font = ImageFont.truetype("arial.ttf", scale*2)
+    except:
+        font = ImageFont.load_default()
+
+    x_text, y_text = cx - scale, cy - scale
+    for num in fib_numbers:
+        draw.text((x_text, y_text), str(num), fill=(255,255,255), font=font)
+        x_text += scale
+        y_text += scale
+
+# ------------------------------
+# Save image
+# ------------------------------
+img.save("detailed_fibonacci_spiral.png")
+print("High-detail Fibonacci image generated!")
