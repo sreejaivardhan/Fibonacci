@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fibonacci Spiral Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { 
+      background: #111; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+      margin: 0; 
+    }
+    canvas { 
+      background: white; 
+      border-radius: 10px; 
+    }
+  </style>
+</head>
+<body>
+  <canvas id="spiral" width="500" height="500"></canvas>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const num = parseInt(urlParams.get('num')) || 10;
+    const ctx = document.getElementById('spiral').getContext('2d');
+
+    let x = 250, y = 250;
+    let angle = 0;
+    let a = 5;
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'gold';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+
+    for (let i = 0; i < num * 20; i++) {
+      const r = a * Math.sqrt(i);
+      x = 250 + r * Math.cos(angle);
+      y = 250 + r * Math.sin(angle);
+      ctx.lineTo(x, y);
+      angle += Math.PI / 4;
+    }
+    ctx.stroke();
+  </script>
+</body>
+</html>
